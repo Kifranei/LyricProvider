@@ -117,18 +117,18 @@ object Apple : YukiBaseHooker() {
         hookMediaMetadataChange()
         hookLyricBuildMethod()
 
-        XposedHelpers.findAndHookMethod(
-            "com.apple.android.music.player.viewmodel.PlayerLyricsViewModel",
-            classLoader,
-            "loadLyrics",
-            classLoader.loadClass("com.apple.android.music.model.PlaybackItem"),
-            object : XC_MethodHook() {
-                @Throws(Throwable::class)
-                override fun afterHookedMethod(param: MethodHookParam?) {
-                    val arg = param?.args?.get(0) ?: return
-                    ObjectUtils.print(arg)
-                }
-            })
+//        XposedHelpers.findAndHookMethod(
+//            "com.apple.android.music.player.viewmodel.PlayerLyricsViewModel",
+//            classLoader,
+//            "loadLyrics",
+//            classLoader.loadClass("com.apple.android.music.model.PlaybackItem"),
+//            object : XC_MethodHook() {
+//                @Throws(Throwable::class)
+//                override fun afterHookedMethod(param: MethodHookParam?) {
+//                    val arg = param?.args?.get(0) ?: return
+//                    ObjectUtils.print(arg)
+//                }
+//            })
     }
 
     // --- Hook 1: 歌曲切换监听 ---
