@@ -44,9 +44,6 @@ object LyricParser {
         //尝试以lrc格式解析
         val yrcTranslateLyric = parseLrc(response.yrcTranslateLyric)
 
-        checkLrcDiff(lrc, lrcTranslateLyric)
-        checkYrcDiff(yrc, yrcTranslateLyric)
-
         if (yrc.isNotEmpty()) {
             yrc.forEach { lyrics.add(it.toLyricLine()) }
         } else if (lrc.isNotEmpty()) {
@@ -58,32 +55,11 @@ object LyricParser {
         return info
     }
 
-    private fun checkYrcDiff(
-        yrc: List<YrcEntry>,
-        lrcTranslateLyric: List<LrcEntry>
-    ) {
-        println("大小：${yrc.size} ${lrcTranslateLyric.size}")
-
-    }
-
-    private fun checkLrcDiff(
-        lrc: List<LrcEntry>,
-        lrcTranslateLyric: List<LrcEntry>
-    ) {
-        println("大小：${lrc.size} ${lrcTranslateLyric.size}")
-        lrc.forEach { entry ->
-
-            val lrcTranslateEntry = lrcTranslateLyric.firstOrNull { entry.start == it.start }
-
-            println("原文：${entry.text}, 翻译：${lrcTranslateEntry?.text}")
-        }
-    }
-
     private fun attachTranslations(lyrics: List<LyricLine>, vararg sources: List<LrcEntry>) {
         lyrics.forEach { line ->
             sources.forEach { source ->
                 val translation =
-                    source.firstOrNull { line.start >= it.start && line.start < it.end }
+                    source.firstOrNull { line.start == it.start }
                 if (translation != null && translation.text.isNotEmpty()) {
                     line.translation = translation.text
                     return@forEach
@@ -153,6 +129,7 @@ object LyricParser {
 
         // 排序并计算 endTime 和 duration
         val sorted = entries.sortedBy { it.start }
+        @Suppress("ReplaceManualRangeWithIndicesCalls")
         for (i in 0 until sorted.size) {
             val current = sorted[i]
             if (i < sorted.size - 1) {
