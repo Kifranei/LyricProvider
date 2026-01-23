@@ -23,10 +23,6 @@
 2. 安装之后在 `Lsposed` 中启用插件
 3. 重启对应的应用
 
-### 联系
-
-- [QQ群](https://qm.qq.com/q/IXif8Zi0Iq)
-
 ## 🐛 问题反馈
 
 如遇到任何问题或功能建议，请前往 [Issues 页面](https://github.com/proify/LyricProvider/issues) 反馈。
