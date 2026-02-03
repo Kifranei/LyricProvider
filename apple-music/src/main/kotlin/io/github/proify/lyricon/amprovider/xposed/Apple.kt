@@ -13,11 +13,11 @@ import com.highcapable.kavaref.condition.type.VagueType
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import de.robv.android.xposed.XposedHelpers
+import io.github.proify.lyricon.common.util.ScreenStateMonitor
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
-import io.github.proify.lyricon.provider.common.util.ScreenStateMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,7 +40,7 @@ object Apple : YukiBaseHooker() {
     private var getPositionMethod: Method? = null
 
     // 协程作用域
-    private val mainScope by lazy { CoroutineScope(Dispatchers.Main + SupervisorJob()) }
+    private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
     private var progressJob: Job? = null
 
     private var provider: LyriconProvider? = null
@@ -72,7 +72,7 @@ object Apple : YukiBaseHooker() {
         val helper =
             LyriconFactory.createProvider(
                 context = application,
-                providerPackageName = Constants.APP_PACKAGE_NAME,
+                providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
                 playerPackageName = application.packageName,
                 logo = ProviderLogo.fromBase64(Constants.ICON)
             )
@@ -201,7 +201,7 @@ object Apple : YukiBaseHooker() {
 
     private fun resumeCoroutineTask() {
         if (progressJob?.isActive == true) return
-        progressJob = mainScope.launch {
+        progressJob = coroutineScope.launch {
             while (isActive && isPlaying) {
                 try {
                     val pos = getPositionMethod?.invoke(exoMediaPlayerInstance) as? Long ?: 0L

@@ -164,7 +164,7 @@ object QQMusic : YukiBaseHooker() {
         private fun setupLyriconProvider(application: Application) {
             val provider = LyriconFactory.createProvider(
                 context = application,
-                providerPackageName = Constants.APP_PACKAGE_NAME,
+                providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
                 playerPackageName = PKG_MAIN,
                 logo = ProviderLogo.fromSvg(Constants.ICON)
             )

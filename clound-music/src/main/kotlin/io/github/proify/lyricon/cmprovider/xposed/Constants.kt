@@ -7,7 +7,7 @@
 package io.github.proify.lyricon.cmprovider.xposed
 
 object Constants {
-    const val APP_PACKAGE_NAME: String = "io.github.proify.lyricon.cmprovider"
+    const val PROVIDER_PACKAGE_NAME: String = "io.github.proify.lyricon.cmprovider"
     const val MUSIC_PACKAGE_NAME: String = "com.netease.cloudmusic"
 
     const val ICON: String =

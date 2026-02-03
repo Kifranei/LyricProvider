@@ -11,8 +11,8 @@ import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.proify.lyricon.cmprovider.xposed.Constants.APP_PACKAGE_NAME
 import io.github.proify.lyricon.cmprovider.xposed.Constants.ICON
+import io.github.proify.lyricon.cmprovider.xposed.Constants.PROVIDER_PACKAGE_NAME
 import io.github.proify.lyricon.cmprovider.xposed.PreferencesMonitor.PreferenceCallback
 import io.github.proify.lyricon.cmprovider.xposed.parser.LyricParser
 import io.github.proify.lyricon.lyric.model.Song
@@ -108,7 +108,7 @@ object CloudMusic : YukiBaseHooker() {
 
             val newProvider = LyriconFactory.createProvider(
                 context = application,
-                providerPackageName = APP_PACKAGE_NAME,
+                providerPackageName = PROVIDER_PACKAGE_NAME,
                 playerPackageName = application.packageName,
                 logo = ProviderLogo.fromSvg(ICON)
             )
@@ -133,7 +133,7 @@ object CloudMusic : YukiBaseHooker() {
         }
 
         /**
-         * 响应歌曲元数据变更 - 同步执行
+         * 响应歌曲元数据变更
          */
         fun onSongChanged(metadata: MediaMetadataCache.Metadata) {
             val newId = metadata.id
@@ -156,7 +156,7 @@ object CloudMusic : YukiBaseHooker() {
                 duration = metadata.duration
             )
 
-            // 2. 同步尝试读取歌词文件并解析
+            // 2. 尝试读取歌词文件并解析
             val rawFile = lyricFileObserver?.getFile(id)
             if (rawFile != null && rawFile.exists()) {
                 try {
@@ -229,11 +229,11 @@ object CloudMusic : YukiBaseHooker() {
         }
 
         inner class HotHooker {
-            private val unhooks = mutableListOf<YukiMemberHookCreator.MemberHookCreator.Result?>()
+            private val unhooks = mutableListOf<YukiMemberHookCreator.MemberHookCreator.Result>()
             var getCurrentTimeMethod: Method? = null
 
             fun rehook(classLoader: ClassLoader) {
-                unhooks.forEach { it?.remove() }
+                unhooks.forEach { it.remove() }
                 unhooks.clear()
 
                 val playServiceClass =

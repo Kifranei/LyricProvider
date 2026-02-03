@@ -8,10 +8,10 @@ package io.github.proify.lyricon.qmprovider.xposed
 
 import android.content.Context
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.proify.lyricon.common.extensions.deflate
+import io.github.proify.lyricon.common.extensions.inflate
+import io.github.proify.lyricon.common.extensions.json
 import io.github.proify.lyricon.lyric.model.Song
-import io.github.proify.lyricon.provider.common.extensions.deflate
-import io.github.proify.lyricon.provider.common.extensions.inflate
-import io.github.proify.lyricon.provider.common.extensions.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
@@ -88,11 +88,11 @@ object DiskSongCache {
         return File(localizedLyricDir, "$songId.json.gz")
     }
 
-    /**
-     * 清理当前语言环境下的所有缓存
-     */
-    fun clearCurrentLocaleCache() {
-        localizedLyricDir.deleteRecursively()
-        localizedLyricDir.mkdirs()
-    }
+//    /**
+//     * 清理当前语言环境下的所有缓存
+//     */
+//    fun clearCurrentLocaleCache() {
+//        localizedLyricDir.deleteRecursively()
+//        localizedLyricDir.mkdirs()
+//    }
 }

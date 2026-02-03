@@ -8,9 +8,9 @@ package io.github.proify.lyricon.amprovider.xposed
 
 import android.content.Context
 import io.github.proify.lyricon.amprovider.xposed.model.AppleSong
-import io.github.proify.lyricon.provider.common.extensions.deflate
-import io.github.proify.lyricon.provider.common.extensions.inflate
-import io.github.proify.lyricon.provider.common.extensions.json
+import io.github.proify.lyricon.common.extensions.deflate
+import io.github.proify.lyricon.common.extensions.inflate
+import io.github.proify.lyricon.common.extensions.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.io.File
 import java.util.Locale
@@ -57,6 +57,6 @@ object DiskSongManager {
         }.getOrNull()
     }
 
-    fun hasCache(id: String): Boolean = getFile(id).exists()
+    //fun hasCache(id: String): Boolean = getFile(id).exists()
     private fun getFile(id: String): File = File(baseDir, "$id.json.gz")
 }

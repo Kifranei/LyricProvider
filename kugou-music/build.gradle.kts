@@ -62,7 +62,7 @@ configure<ApplicationExtension> {
 }
 
 dependencies {
-    implementation(project(":common"))
+    implementation(project(":share:common"))
 
     implementation(libs.lyricon.provider)
     implementation(libs.kotlinx.serialization.json)

@@ -12,12 +12,12 @@ import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.proify.lyricon.common.extensions.toPairMap
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
-import io.github.proify.lyricon.provider.common.extensions.toPairMap
 import io.github.proify.lyricon.spotifyprovider.xposed.api.NoFoundLyricException
 import io.github.proify.lyricon.spotifyprovider.xposed.api.SpotifyApi
 import io.github.proify.lyricon.spotifyprovider.xposed.api.SpotifyApi.jsonParser
@@ -126,7 +126,7 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
         val context = appContext ?: return
         lyriconProvider = LyriconFactory.createProvider(
             context = context,
-            providerPackageName = Constants.APP_PACKAGE_NAME,
+            providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
             playerPackageName = Constants.MUSIC_PACKAGE_NAME,
             logo = ProviderLogo.fromSvg(Constants.ICON)
         ).apply { register() }

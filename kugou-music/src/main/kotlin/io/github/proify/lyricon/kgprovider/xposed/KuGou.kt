@@ -13,10 +13,10 @@ import android.os.Looper
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.proify.lyricon.common.util.Utils
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
-import io.github.proify.lyricon.provider.common.util.Utils
 
 object KuGou : YukiBaseHooker() {
     private const val TAG = "KuGouMusicProvider"
@@ -53,7 +53,7 @@ object KuGou : YukiBaseHooker() {
         val context = appContext ?: return
         lyriconProvider = LyriconFactory.createProvider(
             context = context,
-            providerPackageName = Constants.APP_PACKAGE_NAME,
+            providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
             playerPackageName = Constants.MUSIC_PACKAGE_NAME,
             logo = ProviderLogo.fromBase64(Constants.ICON)
         ).apply { register() }

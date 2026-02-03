@@ -62,8 +62,8 @@ configure<ApplicationExtension> {
 }
 
 dependencies {
-    implementation(project(":common"))
-    implementation(project(":qrckit"))
+    implementation(project(":share:common"))
+    implementation(project(":share:qrckit"))
 
     implementation(libs.lyricon.provider)
     implementation(libs.kotlinx.serialization.json)

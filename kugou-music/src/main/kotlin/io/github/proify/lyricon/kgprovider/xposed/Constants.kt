@@ -7,7 +7,7 @@
 package io.github.proify.lyricon.kgprovider.xposed
 
 object Constants {
-    const val APP_PACKAGE_NAME: String = "io.github.proify.lyricon.kgprovider"
+    const val PROVIDER_PACKAGE_NAME: String = "io.github.proify.lyricon.kgprovider"
     const val MUSIC_PACKAGE_NAME: String = "com.kugou.android"
 
     const val ICON: String =

@@ -6,9 +6,12 @@
       <w>amprovider</w>
       <w>cloudmusic</w>
       <w>cmprovider</w>
+      <w>ikunshare</w>
       <w>kgprovider</w>
       <w>kugou</w>
       <w>lrctype</w>
+      <w>lxnetease</w>
+      <w>lxprovider</w>
       <w>lyriconmodule</w>
       <w>mmkv</w>
       <w>musicid</w>
@@ -21,6 +24,7 @@
       <w>showtranslyric</w>
       <w>spotifyprovider</w>
       <w>temurin</w>
+      <w>toside</w>
     </words>
   </dictionary>
 </component>

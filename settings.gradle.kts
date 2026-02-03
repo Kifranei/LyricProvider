@@ -32,11 +32,13 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "LyricProvider"
-include(":common")
-include(":qrckit")
+include(":share:common")
+include(":share:qrckit")
+include(":share:lrckit")
 
 include(":apple-music")
 include(":clound-music")
 include(":qq-music")
 include(":kugou-music")
 include(":spotify-music")
+include(":lx-music")
