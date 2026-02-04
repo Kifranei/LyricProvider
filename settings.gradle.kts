@@ -6,12 +6,6 @@
 
 @file:Suppress("UnstableApiUsage")
 
-include(":share:yrckit")
-
-
-include(":share:cloudlyric")
-
-
 pluginManagement {
     repositories {
         mavenLocal()
@@ -41,6 +35,8 @@ rootProject.name = "LyricProvider"
 include(":share:common")
 include(":share:qrckit")
 include(":share:lrckit")
+include(":share:yrckit")
+include(":share:cloudlyric")
 
 include(":apple-music")
 include(":clound-music")

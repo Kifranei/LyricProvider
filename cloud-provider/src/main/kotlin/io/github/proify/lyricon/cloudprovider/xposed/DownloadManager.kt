@@ -8,7 +8,6 @@ package io.github.proify.lyricon.cloudprovider.xposed
 
 import io.github.proify.cloudlyric.CloudLyrics
 import io.github.proify.cloudlyric.SearchOptions
-import io.github.proify.cloudlyric.provider.lrclib.LrcLibProvider
 import io.github.proify.cloudlyric.provider.qq.QQMusicProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +21,7 @@ object DownloadManager {
     val cloudLyrics = CloudLyrics(
         listOf(
             QQMusicProvider(),
-            LrcLibProvider() //LRCLIB 比较慢
+            //   LrcLibProvider() //LRCLIB 比较慢
         )
     )
 
