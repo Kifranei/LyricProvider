@@ -5,13 +5,5 @@
   -->
 
 <resources>
-
-    <string-array name="xposed_scope">
-        <item>cn.kuwo.player</item>
-    </string-array>
-
-    <string-array name="lyricon_module_tags">
-        <item>车载歌词</item>
-    </string-array>
-
+    <color name="ic_launcher_background">#2196F3</color>
 </resources>

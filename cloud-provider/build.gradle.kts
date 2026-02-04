@@ -13,17 +13,17 @@ plugins {
 }
 
 configure<ApplicationExtension> {
-    namespace = "io.github.proify.lyricon.ytprovider"
+    namespace = "io.github.proify.lyricon.cloudprovider"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "io.github.proify.lyricon.ytprovider"
+        applicationId = "io.github.proify.lyricon.cloudprovider"
         minSdk = 27
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.0-alpha2"
+        versionCode = 1
+        versionName = "1.0.0-alpha1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,6 +63,7 @@ configure<ApplicationExtension> {
 
 dependencies {
     implementation(project(":share:common"))
+    implementation(project(":share:cloudlyric"))
 
     implementation(libs.lyricon.provider)
     implementation(libs.kotlinx.serialization.json)

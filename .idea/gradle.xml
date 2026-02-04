@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/apple-music" />
+            <option value="$PROJECT_DIR$/cloud-provider" />
             <option value="$PROJECT_DIR$/clound-music" />
             <option value="$PROJECT_DIR$/kugou-music" />
             <option value="$PROJECT_DIR$/kuwo-music" />
@@ -22,7 +23,6 @@
             <option value="$PROJECT_DIR$/share/qrckit" />
             <option value="$PROJECT_DIR$/share/yrckit" />
             <option value="$PROJECT_DIR$/spotify-music" />
-            <option value="$PROJECT_DIR$/youtube-music" />
           </set>
         </option>
       </GradleProjectSettings>
