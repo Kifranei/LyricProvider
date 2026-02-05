@@ -101,18 +101,21 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
                         if (isPlaybackActive(state)) {
                             val pending = pendingTrackIntent
                             if (pending != null) {
-                                YLog.debug(tag = TAG, msg = "Playback active, processing pending sticky track intent")
+                                YLog.debug(
+                                    tag = TAG,
+                                    msg = "Playback active, processing pending sticky track intent"
+                                )
                                 handleTrackChange(pending)
                                 pendingTrackIntent = null
                             }
                         }
 
-                        if (state.state == PlaybackState.STATE_PLAYING) {
-                            startSyncPositionTask()
-                        } else if (state.state == PlaybackState.STATE_PAUSED
-                            || state.state == PlaybackState.STATE_STOPPED
-                        ) {
-                            stopSyncPositionTask()
+                        when (state.state) {
+                            PlaybackState.STATE_PLAYING -> stopSyncPositionTask()
+                            PlaybackState.STATE_PAUSED,
+                            PlaybackState.STATE_STOPPED -> startSyncPositionTask()
+
+                            else -> Unit
                         }
                     }
                 }
@@ -132,6 +135,7 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
             PlaybackState.STATE_REWINDING,
             PlaybackState.STATE_SKIPPING_TO_NEXT,
             PlaybackState.STATE_SKIPPING_TO_PREVIOUS -> true
+
             else -> false // STATE_STOPPED, STATE_NONE, STATE_ERROR, STATE_CONNECTING
         }
     }
@@ -177,7 +181,10 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
             override fun onReceive(context: Context, intent: Intent) {
                 // 处理粘性广播逻辑：如果应用刚启动收到历史广播且当前未播放，则拦截
                 if (isInitialStickyBroadcast && !isPlaybackActive(lastPlaybackState)) {
-                    YLog.debug(tag = TAG, msg = "Sticky broadcast detected while inactive, pending track change")
+                    YLog.debug(
+                        tag = TAG,
+                        msg = "Sticky broadcast detected while inactive, pending track change"
+                    )
                     pendingTrackIntent = intent
                     return
                 }
@@ -284,7 +291,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
      * @param uri 文件的 SAF URI
      */
     private fun setSongFromUri(data: TrackMetadata, uri: Uri): Boolean {
-        val startTime = System.currentTimeMillis()
         val lyric = matchLyric(uri) ?: run {
             YLog.debug(tag = TAG, msg = "No lyric found in $uri")
             return false
@@ -303,11 +309,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
         )
 
         provider?.player?.setSong(song)
-
-        YLog.debug(
-            tag = TAG,
-            msg = "Song updated. Match/Parse cost: ${System.currentTimeMillis() - startTime}ms"
-        )
         return true
     }
 

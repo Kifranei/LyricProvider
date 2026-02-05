@@ -13,10 +13,6 @@ import java.util.TreeMap
 
 /**
  * 将普通歌词行列表转换为包含翻译和罗马音的富文本歌词行。
- * * 优化点：
- * 1. 预解析辅助歌词，避免循环内重复解析。
- * 2. 引入 [threshold] 允许时间戳存在微小误差。
- * 3. 使用 [TreeMap] 进行高效的时间范围检索。
  *
  * @param transLrc 翻译歌词文本
  * @param romaLrc 罗马音歌词文本

@@ -9,6 +9,7 @@
       <w>cloudprovider</w>
       <w>cmprovider</w>
       <w>externalstorage</w>
+      <w>fishcpy</w>
       <w>ikunshare</w>
       <w>kgprovider</w>
       <w>kugou</w>
@@ -28,6 +29,7 @@
       <w>qqmusic</w>
       <w>qqmusicplayer</w>
       <w>qrckit</w>
+      <w>saltprovider</w>
       <w>showromalyric</w>
       <w>showtranslyric</w>
       <w>spotifyprovider</w>
