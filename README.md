@@ -19,19 +19,19 @@
 
 目前已适配以下音乐客户端的歌词抓取：
 
-| 平台              | 状态      | 下载                                                                                       | 说明               |
-|:----------------|:--------|------------------------------------------------------------------------------------------|:-----------------|
-| **Apple Music** | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=apple-music)        | 支持动态歌词/翻译        |
-| **网易云音乐**       | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=clound-music-music) | 支持动态歌词/翻译        |
-| **QQ音乐**        | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=qq-music)           | 支持动态歌词/翻译        |
-| **光锥音乐**        | 🟢稳定    | [查看](https://coneplayer.trantor.ink/)                                                    | 由开发者适配           |
-| **LX音乐**        | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=lx-music)           | 支持翻译             |
-| **酷狗音乐&概念版**    | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=kugou-music)        | 基于车载歌词           |
-| **酷我音乐**        | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=kuwo-music)         | 基于车载歌词           |
-| **Spotify**     | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=spotify-music)      | 仅普通歌词            |
-| **Poweramp**    | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=poweramp-music)     | 支持网络/内嵌歌词        |
-| **云音乐**         | 🟠实验性   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=cloud-provider)     | 支持所有播放器/从搜索网络歌词  |
-| 🎸 **更多平台**     | 🛠️ 开发中 | 无                                                                                        | 欢迎提交 PR 适配更多 App |
+| 平台              | 状态      | 下载                                                                                     | 说明               |
+|:----------------|:--------|----------------------------------------------------------------------------------------|:-----------------|
+| **Apple Music** | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=apple,-music)     | 支持动态歌词/翻译        |
+| **网易云音乐**       | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=clound%2Dmusic)   | 支持动态歌词/翻译        |
+| **QQ音乐**        | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=qq%2Dmusic)       | 支持动态歌词/翻译        |
+| **光锥音乐**        | 🟢稳定    | [查看](https://coneplayer.trantor.ink/)                                                  | 由开发者适配           |
+| **LX音乐**        | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=lx%2Dmusic)       | 支持翻译             |
+| **酷狗音乐&概念版**    | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=kugou%2Dmusic)    | 基于车载歌词           |
+| **酷我音乐**        | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=kuwo%2Dmusic)     | 基于车载歌词           |
+| **Spotify**     | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=spotify%2Dmusic)  | 仅普通歌词            |
+| **Poweramp**    | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=poweramp%2Dmusic) | 支持网络/内嵌歌词        |
+| **云音乐**         | 🟠实验性   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=cloud%2Dprovider) | 支持所有播放器/从搜索网络歌词  |
+| 🎸 **更多平台**     | 🛠️ 开发中 | 无                                                                                      | 欢迎提交 PR 适配更多 App |
 
 ---
 
