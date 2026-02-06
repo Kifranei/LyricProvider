@@ -13,26 +13,13 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
-import io.github.proify.lyricon.saltprovider.xposed.SaltPlayer.TIMEOUT
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 object SaltPlayer : YukiBaseHooker() {
 
     /** 魅族 Ticker 标志位 */
     private const val FLAG_TICKER = 0x1000000 or 0x2000000
 
-    /** 歌词显示的超时时间（毫秒），超时后自动清除歌词 */
-    private const val TIMEOUT = 10 * 1000L
-
     private var isPlaying = false
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val lyricFlow = MutableSharedFlow<String?>(extraBufferCapacity = 1)
 
     private val provider: LyriconProvider by lazy {
         LyriconFactory.createProvider(
@@ -46,23 +33,8 @@ object SaltPlayer : YukiBaseHooker() {
     override fun onHook() {
         onAppLifecycle {
             onCreate {
-                observeLyrics()
                 hookMedia()
                 hookNotify()
-            }
-        }
-    }
-
-    /**
-     * 启动协程观察歌词流。
-     * 接收到新歌词时发送至宿主，并在 [TIMEOUT] 时间后若无更新则清除。
-     */
-    private fun observeLyrics() = scope.launch {
-        lyricFlow.collectLatest { text ->
-            provider.player.sendText(text)
-            if (text != null) {
-                delay(TIMEOUT)
-                provider.player.sendText(null)
             }
         }
     }
@@ -107,7 +79,7 @@ object SaltPlayer : YukiBaseHooker() {
                         val notify = args[2] as Notification
                         if ((notify.flags and FLAG_TICKER) != 0) {
                             val ticker = notify.tickerText?.toString()
-                            lyricFlow.tryEmit(ticker?.trim())
+                            provider.player.sendText(ticker)
                         }
                     }
                 }
