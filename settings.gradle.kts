@@ -39,7 +39,7 @@ include(":share:yrckit")
 include(":share:cloudlyric")
 
 include(":apple-music")
-include(":clound-music")
+include(":163-music")
 
 //腾讯系
 include(":qq-music")
