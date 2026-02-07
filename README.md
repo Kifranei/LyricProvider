@@ -6,6 +6,7 @@
 ![Downloads](https://img.shields.io/github/downloads/proify/LyricProvider/total?style=flat&color=orange)
 ![License](https://img.shields.io/github/license/proify/LyricProvider?style=flat)
 ![Last Commit](https://img.shields.io/github/last-commit/proify/LyricProvider?style=flat)
+![English](README-English.md)
 
 ## 🎵 支持平台
 
