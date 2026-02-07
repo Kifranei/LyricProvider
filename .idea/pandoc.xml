@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Pandoc.Settings">
-    <option name="pathToImages" value="C:\Users\Lin\Pictures" />
-    <option name="pathToPandoc" value="C:\Users\Lin\AppData\Local\Microsoft\WinGet\Packages\JohnMacFarlane.Pandoc_Microsoft.Winget.Source_8wekyb3d8bbwe\pandoc-3.8.3\pandoc.exe" />
-  </component>
-</project>
