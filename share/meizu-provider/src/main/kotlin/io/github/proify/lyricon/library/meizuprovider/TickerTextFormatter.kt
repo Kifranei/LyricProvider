@@ -19,6 +19,14 @@ private fun String.countHan(): Int = count { it.isHan() }
 internal fun parseMeizuTickerTextForLyricon(raw: String?): TickerTextParts? {
     val text = raw?.trim()
     if (text.isNullOrEmpty()) return null
+
+    val caretIndex = text.indexOf('^')
+    if (caretIndex in 1 until text.lastIndex) {
+        val main = text.substring(0, caretIndex).trim()
+        val trans = text.substring(caretIndex + 1).trim().takeIf { it.isNotEmpty() }
+        if (main.isNotEmpty() && trans != null) return TickerTextParts(main, trans)
+    }
+
     val firstNewline = text.indexOf('\n')
     if (firstNewline >= 0) {
         val main = text.substring(0, firstNewline).trim()

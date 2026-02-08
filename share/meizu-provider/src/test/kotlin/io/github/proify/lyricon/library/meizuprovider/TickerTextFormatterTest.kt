@@ -43,4 +43,11 @@ class TickerTextFormatterTest {
         val expected = TickerTextParts("You are a million miles away", "(你远在千里之外)")
         assertEquals(expected, parseMeizuTickerTextForLyricon(raw))
     }
+
+    @Test
+    fun `插入符号翻译拆分`() {
+        val raw = "Its not until you fall that you fly ^唯有跌倒过才能学会飞翔"
+        val expected = TickerTextParts("Its not until you fall that you fly", "唯有跌倒过才能学会飞翔")
+        assertEquals(expected, parseMeizuTickerTextForLyricon(raw))
+    }
 }

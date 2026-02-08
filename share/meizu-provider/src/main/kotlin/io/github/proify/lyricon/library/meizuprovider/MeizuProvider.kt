@@ -38,6 +38,7 @@ open class MeizuProvider(
     private var isPlaying = false
     private var isTranslationEnabled = false
     private val textSongId = "meizu-ticker-text"
+    private val tickerLines = ArrayDeque<RichLyricLine>()
     private val positionScheduler by lazy {
         Executors.newSingleThreadScheduledExecutor { runnable ->
             Thread(runnable, "Lyricon-Position-$providerPackageName").apply { isDaemon = true }
@@ -98,6 +99,9 @@ open class MeizuProvider(
         isPlaying = state
         provider.player.setPlaybackState(state)
         if (state) {
+            if (lastPositionUpdateElapsedMs <= 0L) {
+                lastPositionUpdateElapsedMs = SystemClock.elapsedRealtime()
+            }
             startPositionLoop()
         } else {
             stopPositionLoop()
@@ -105,8 +109,8 @@ open class MeizuProvider(
     }
 
     private fun updatePlaybackPosition(playback: PlaybackState) {
-        lastPositionMs = playback.position
-        lastSpeed = playback.playbackSpeed
+        lastPositionMs = playback.position.coerceAtLeast(0L)
+        lastSpeed = playback.playbackSpeed.takeIf { it > 0f } ?: 1f
         lastPositionUpdateElapsedMs = SystemClock.elapsedRealtime()
         provider.player.setPosition(lastPositionMs)
     }
@@ -188,25 +192,32 @@ open class MeizuProvider(
                                 isTranslationEnabled = true
                             }
                             if (parts.translation != null) {
-                                val lineBegin = estimateCurrentPositionMs().coerceAtLeast(0L)
-                                val lineDuration =
-                                    (parts.text.count { !it.isWhitespace() } * 140L).coerceIn(2500L, 12000L)
-                                val lineEnd = lineBegin + lineDuration
+                                val position = estimateCurrentPositionMs().coerceAtLeast(0L)
+                                tickerLines.lastOrNull()?.let { prev ->
+                                    if (position > prev.begin) {
+                                        prev.end = position
+                                        prev.duration = prev.end - prev.begin
+                                    }
+                                }
+
+                                val line = RichLyricLine(
+                                    text = parts.text,
+                                    begin = position,
+                                    end = position + 5000L,
+                                    duration = 5000L,
+                                    words = buildPseudoWords(parts.text, position, 5000L),
+                                    translation = parts.translation
+                                )
+                                tickerLines.addLast(line)
+                                while (tickerLines.size > 200) tickerLines.removeFirst()
+
+                                val builtLyrics = tickerLines.toList()
                                 val song = Song(id = textSongId).apply {
-                                    lyrics = listOf(
-                                        RichLyricLine(
-                                            text = parts.text,
-                                            begin = lineBegin,
-                                            end = lineEnd,
-                                            duration = lineDuration,
-                                            words = buildPseudoWords(parts.text, lineBegin, lineDuration),
-                                            translation = parts.translation
-                                        )
-                                    )
-                                    duration = Long.MAX_VALUE
+                                    lyrics = builtLyrics
+                                    duration = builtLyrics.maxOfOrNull { l -> l.end } ?: Long.MAX_VALUE
                                 }
                                 provider.player.setSong(song)
-                                provider.player.setPosition(lineBegin)
+                                provider.player.setPosition(position)
                             } else {
                                 provider.player.sendText(parts.text)
                             }
