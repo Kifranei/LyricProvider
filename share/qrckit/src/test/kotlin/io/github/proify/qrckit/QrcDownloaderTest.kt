@@ -12,8 +12,13 @@ import kotlin.test.Test
 class QrcDownloaderTest {
     @Test
     fun testDownload() {
-        val response: LyricResponse = QrcDownloader.downloadLyrics("251133351")
+        val response: LyricResponse = QrcDownloader.downloadLyrics("355898101")
         val data: ParsedLyric = response.parsedLyric
+
+        response.parsedLyric.lyricsRaw?.lines()?.forEach {
+            //  println(it)
+        }
+
         data.richLyricLines.forEach {
             println(it)
         }

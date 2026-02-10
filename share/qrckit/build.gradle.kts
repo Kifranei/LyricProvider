@@ -20,6 +20,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":share:extensions-kt"))
     implementation(libs.kotlinx.serialization.json)
     testImplementation(kotlin("test"))
     implementation(project(":share:lrckit"))

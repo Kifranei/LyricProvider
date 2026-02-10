@@ -27,6 +27,7 @@ import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.qrckit.LyricResponse
 
 object QQMusic : YukiBaseHooker() {
+
     private const val TAG = "Lyricon_QQMusic"
     private const val PKG_MAIN = "com.tencent.qqmusic"
     private const val PKG_PLAYER_SERVICE = "com.tencent.qqmusic:QQPlayerService"
@@ -128,6 +129,7 @@ object QQMusic : YukiBaseHooker() {
 
         private fun registerSettingsReceiver(application: Application) {
             val filter = IntentFilter(ACTION_LYRIC_SETTINGS_CHANGED)
+
             ContextCompat.registerReceiver(application, object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     val key = intent?.getStringExtra("setting_key") ?: return
@@ -176,6 +178,7 @@ object QQMusic : YukiBaseHooker() {
 
         private fun updateSongWithPlaceholder(mediaId: String) {
             val metadata = MediaMetadataCache.get(mediaId)
+
             updateLyriconSong(
                 Song(
                     id = mediaId,
@@ -195,7 +198,6 @@ object QQMusic : YukiBaseHooker() {
             DiskSongCache.put(song)
 
             if (response.id == currentMediaId) {
-                // 如果当前是占位符，则更新为完整歌词
                 updateLyriconSong(song)
             }
         }
