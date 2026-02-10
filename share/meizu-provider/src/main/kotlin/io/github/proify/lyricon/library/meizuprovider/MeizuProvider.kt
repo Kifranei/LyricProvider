@@ -37,6 +37,8 @@ open class MeizuProvider(
 
     private var isPlaying = false
     private var isTranslationEnabled = false
+    private var lastSongInfo: String? = null  // 用于存储当前歌曲信息，如标题等
+    private var lastNotificationTime: Long = 0L  // 记录上次收到歌词通知的时间
     private val textSongId = "meizu-ticker-text"
     private val tickerLines = ArrayDeque<RichLyricLine>()
     private val positionScheduler by lazy {
@@ -187,6 +189,29 @@ open class MeizuProvider(
                             Log.d(TAG, "ticker: ${notify.tickerText}")
                             val ticker = notify.tickerText?.toString()
                             val parts = parseMeizuTickerTextForLyricon(ticker) ?: return@after
+                            
+                            // 获取当前时间戳
+                            val currentTime = System.currentTimeMillis()
+                            
+                            // 检测是否可能是新歌曲：
+                            // 1. 如果上次通知时间与当前时间差距较大（例如超过30秒），可能表示切换了歌曲
+                            // 2. 或者如果歌词内容与之前完全不同，也可能表示新歌曲
+                            val currentSongInfo = parts.text
+                            val timeDiff = currentTime - lastNotificationTime
+                            
+                            // 如果时间间隔较长（比如大于30秒）或者歌曲信息不同，认为是新歌曲
+                            val isNewSong = timeDiff > 30000L || (lastSongInfo != null && lastSongInfo != currentSongInfo)
+                            
+                            if (isNewSong) {
+                                // 新歌曲开始，清空歌词队列
+                                tickerLines.clear()
+                                lastSongInfo = currentSongInfo
+                                lastNotificationTime = currentTime
+                            } else {
+                                // 同一首歌，更新时间
+                                lastNotificationTime = currentTime
+                            }
+                            
                             if (parts.translation != null && !isTranslationEnabled) {
                                 provider.player.setDisplayTranslation(true)
                                 isTranslationEnabled = true
