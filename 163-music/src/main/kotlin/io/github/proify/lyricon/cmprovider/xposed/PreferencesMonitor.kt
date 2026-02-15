@@ -19,7 +19,7 @@ class PreferencesMonitor(
     callback: PreferenceCallback
 ) {
     private var preferences: SharedPreferences? = null
-    private val getPreferenceMethodData: MethodData
+    private val getPreferenceMethodData: MethodData?
     private var getPreferenceMethod: Method? = null
 
     init {
@@ -36,7 +36,7 @@ class PreferencesMonitor(
                     modifiers(Modifier.PUBLIC or Modifier.STATIC)
                     usingStrings("com.netease.cloudmusic.preferences")
                 }
-            }.single()
+            }.singleOrNull()
         }
         YLog.debug("PreferencesMonitor initialization completed in ${time}ms")
     }
@@ -49,7 +49,7 @@ class PreferencesMonitor(
         }
 
     fun update(classLoader: ClassLoader) {
-        getPreferenceMethod = getPreferenceMethodData.getMethodInstance(classLoader)
+        getPreferenceMethod = getPreferenceMethodData?.getMethodInstance(classLoader)
         preferences?.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener)
         preferences = null
     }

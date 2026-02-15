@@ -8,14 +8,13 @@ package io.github.proify.lyricon.cmprovider.xposed
 
 import io.github.proify.extensions.findClosest
 import io.github.proify.lrckit.LrcParser
-import io.github.proify.lyricon.cmprovider.xposed.parser.LocalLyricCache
 import io.github.proify.lyricon.lyric.model.LyricLine
 import io.github.proify.lyricon.lyric.model.RichLyricLine
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.yrckit.YrcParser
 
 fun LocalLyricCache.toSong(): Song {
-    val metadata = MediaMetadataCache.getMetadataById(musicId)
+    val metadata = MediaMetadataCache.get(musicId)
     val richLyricLines = toRichLines()
 
     return Song(id = musicId.toString()).apply {

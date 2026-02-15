@@ -76,5 +76,4 @@ data class LyricAgent(
         result = 31 * result + (id?.hashCode() ?: 0)
         return result
     }
-
 }
