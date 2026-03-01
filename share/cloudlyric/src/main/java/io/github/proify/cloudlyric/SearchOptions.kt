@@ -34,7 +34,6 @@ data class SearchOptions(
     /**
      * 结果过滤谓词列表。
      * 只有满足所有谓词的结果才会被保留。
-     * 例如：{ it.lyrics.isPolyphonic } // 仅保留多音轨歌词
      */
     val predicates: MutableList<(ProviderLyrics) -> Boolean> = mutableListOf(),
 

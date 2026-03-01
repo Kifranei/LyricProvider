@@ -22,6 +22,7 @@ object DownloadManager {
 
     fun download(id: String, downloadCallback: DownloadCallback) {
         if (isDownloading(id)) return
+        downloadingIds.add(id)
 
         scope.launch {
             try {

@@ -24,7 +24,7 @@ fun NetResponseCache.toRichLyric(): List<RichLyricLine> {
             duration = line.duration,
             text = line.text,
             words = line.words,
-            translation = translationLines?.findClosest(line.begin, 50)?.text
+            translation = if (translation == line.text) null else translation
         )
     }
 }

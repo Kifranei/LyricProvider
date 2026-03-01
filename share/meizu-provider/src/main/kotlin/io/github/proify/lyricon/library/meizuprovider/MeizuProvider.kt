@@ -79,6 +79,12 @@ open class MeizuProvider(
                         if ((notify.flags and FLAG_MEIZU_TICKER) != 0) {
                             Log.d(TAG, "ticker: ${notify.tickerText}")
                             val ticker = notify.tickerText?.toString()
+
+                            if (ticker == null) {
+                                provider.player.sendText(null)
+                                return@after
+                            }
+                            //val lines = ticker.lines()
                             provider.player.sendText(ticker)
                         }
                     }
