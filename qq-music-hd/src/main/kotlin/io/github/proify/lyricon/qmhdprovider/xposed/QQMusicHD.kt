@@ -53,8 +53,11 @@ object QQMusicHD : YukiBaseHooker() {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val downloadingIds = ConcurrentHashMap.newKeySet<String>()
 
-    /** QRC 歌词缓存：songId → lyrics */
-    private val qrcCache = ConcurrentHashMap<String, List<RichLyricLine>>()
+    /** QRC 歌词缓存：songId → lyrics，LRU 淘汰，最多缓存 20 首 */
+    private val qrcCache = object : LinkedHashMap<String, List<RichLyricLine>>(20, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, List<RichLyricLine>>?) =
+            size > 20
+    }
 
     override fun onHook() {
         val loader = appClassLoader ?: return
@@ -142,7 +145,7 @@ object QQMusicHD : YukiBaseHooker() {
         val duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION)
 
         // 1. 已有 QRC 缓存，直接用
-        qrcCache[songId]?.let { cached ->
+        synchronized(qrcCache) { qrcCache[songId] }?.let { cached ->
             lyriconProvider?.player?.setSong(
                 Song(id = songId, name = title, artist = artist,
                     duration = duration, lyrics = cached)
@@ -169,7 +172,7 @@ object QQMusicHD : YukiBaseHooker() {
                     .removeInvalidTranslation()
 
                 if (qrcLyrics.isNotEmpty()) {
-                    qrcCache[songId] = qrcLyrics
+                    synchronized(qrcCache) { qrcCache[songId] = qrcLyrics }
                     if (currentSongId == songId) {
                         lyriconProvider?.player?.setSong(
                             Song(id = songId, name = title, artist = artist,
