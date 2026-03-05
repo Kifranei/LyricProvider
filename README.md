@@ -1,11 +1,11 @@
 # LyricProvider - 歌词提供器
 
 ![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=flat&logo=android)
-![Release](https://img.shields.io/github/v/release/proify/LyricProvider?style=flat&color=blue&logo=github)
-![Size](https://img.shields.io/github/repo-size/proify/LyricProvider)
-![Downloads](https://img.shields.io/github/downloads/proify/LyricProvider/total?style=flat&color=orange)
-![License](https://img.shields.io/github/license/proify/LyricProvider?style=flat)
-![Last Commit](https://img.shields.io/github/last-commit/proify/LyricProvider?style=flat)
+![Release](https://img.shields.io/github/v/release/tomakino/LyricProvider?style=flat&color=blue&logo=github)
+![Size](https://img.shields.io/github/repo-size/tomakino/LyricProvider)
+![Downloads](https://img.shields.io/github/downloads/tomakino/LyricProvider/total?style=flat&color=orange)
+![License](https://img.shields.io/github/license/tomakino/LyricProvider?style=flat)
+![Last Commit](https://img.shields.io/github/last-commit/tomakino/LyricProvider?style=flat)
 
 <!--suppress ALL -->
 <p align="left">
@@ -49,9 +49,9 @@
 ## 📥 快速安装
 
 > [!IMPORTANT]
-> 本插件属于扩展组件，必须配合 **[词幕](https://github.com/proify/lyricon)** 主程序方可运行。
+> 本插件属于扩展组件，必须配合 **[词幕](https://github.com/tomakino/lyricon)** 主程序方可运行。
 
-1. **下载**：前往 [Releases 页面](https://github.com/proify/LyricProvider/releases) 获取最新的 APK
+1. **下载**：前往 [Releases 页面](https://github.com/tomakino/LyricProvider/releases) 获取最新的 APK
    安装包。
 2. **激活**：安装后进入 **LSPosed 管理器**，勾选启用 **对应提供者**。
 3. **配置作用域**：在 LSPosed 中勾选你需要获取歌词的音乐 App（如 Apple Music、网易云等）。
@@ -63,24 +63,24 @@
 
 我们非常欢迎社区提交 Pull Request 来适配更多音乐 App。
 
-请阅读 [开发文档](https://github.com/proify/lyricon/blob/master/lyric/bridge/provider/README.md)
+请阅读 [开发文档](https://github.com/tomakino/lyricon/blob/master/lyric/bridge/provider/README.md)
 
 ---
 
 ## 🤝 贡献者
 
-[![Contributors](https://contrib.rocks/image?repo=proify/LyricProvider)](https://github.com/proify/LyricProvider/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=tomakino/LyricProvider)](https://github.com/tomakino/LyricProvider/graphs/contributors)
 
 ### Star 增长
 
-<a href="https://star-history.com/#proify/LyricProvider&Date">
+<a href="https://star-history.com/#tomakino/LyricProvider&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date" />
  </picture>
 </a>
 
 ### 访问趋势
 
-![Visitors](https://count.getloli.com/get/@proify_LyricProvider?theme=minecraft)
+![Visitors](https://count.getloli.com/get/@tomakino_LyricProvider?theme=minecraft)

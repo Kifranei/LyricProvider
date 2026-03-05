@@ -1,11 +1,11 @@
 # Lyric Extensions for Lyricon
 
 ![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=flat&logo=android)
-![Release](https://img.shields.io/github/v/release/proify/LyricProvider?style=flat&color=blue&logo=github)
-![Size](https://img.shields.io/github/repo-size/proify/LyricProvider)
-![Downloads](https://img.shields.io/github/downloads/proify/LyricProvider/total?style=flat&color=orange)
-![License](https://img.shields.io/github/license/proify/LyricProvider?style=flat)
-![Last Commit](https://img.shields.io/github/last-commit/proify/LyricProvider?style=flat)
+![Release](https://img.shields.io/github/v/release/tomakino/LyricProvider?style=flat&color=blue&logo=github)
+![Size](https://img.shields.io/github/repo-size/tomakino/LyricProvider)
+![Downloads](https://img.shields.io/github/downloads/tomakino/LyricProvider/total?style=flat&color=orange)
+![License](https://img.shields.io/github/license/tomakino/LyricProvider?style=flat)
+![Last Commit](https://img.shields.io/github/last-commit/tomakino/LyricProvider?style=flat)
 
 ## 🎵 Supported Platforms
 
@@ -47,11 +47,11 @@ The following players have built-in support for the Lyricon protocol and work ou
 ## 📥 Installation
 
 > [!IMPORTANT]
-> This is an **extension package**. You must have the [Lyricon](https://github.com/proify/lyricon)
+> This is an **extension package**. You must have the [Lyricon](https://github.com/tomakino/lyricon)
 > main application installed for this to function.
 
 1. **Download**: Grab the latest APK from
-   the [Releases page](https://github.com/proify/LyricProvider/releases).
+   the [Releases page](https://github.com/tomakino/LyricProvider/releases).
 2. **Activate**: Install the APK, open your **LSPosed Manager**, and enable the specific Provider
    module.
 3. **Configure Scope**: In LSPosed, select the target music apps you wish to hook (e.g., Spotify,
@@ -66,24 +66,24 @@ We welcome community contributions! If you'd like to help adapt more music playe
 documentation.
 
 Refer to
-the [Development Guide](https://github.com/proify/lyricon/blob/master/lyric/bridge/provider/README-English.md).
+the [Development Guide](https://github.com/tomakino/lyricon/blob/master/lyric/bridge/provider/README-English.md).
 
 ---
 
 ## 🤝 Contributors
 
-[![Contributors](https://contrib.rocks/image?repo=proify/LyricProvider)](https://github.com/proify/LyricProvider/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=tomakino/LyricProvider)](https://github.com/tomakino/LyricProvider/graphs/contributors)
 
 ### Star Growth
 
-<a href="https://star-history.com/#proify/LyricProvider&Date">
+<a href="https://star-history.com/#tomakino/LyricProvider&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=proify/LyricProvider&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date" />
  </picture>
 </a>
 
 ### Traffic Trends
 
-![Visitors](https://count.getloli.com/get/@proify_LyricProvider?theme=minecraft)
+![Visitors](https://count.getloli.com/get/@tomakino_LyricProvider?theme=minecraft)
