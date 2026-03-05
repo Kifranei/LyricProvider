@@ -39,9 +39,7 @@ object QQMusicHD : YukiBaseHooker() {
 
     private const val TAG = "Lyricon_QQMusicHD"
 
-    private const val PREF_NAME_QQMUSIC = "qqmusicplayer"
-    private const val KEY_DISPLAY_TRANS = "showTransLyric"
-    private const val KEY_DISPLAY_ROMA = "showRomaLyric"
+    private const val KEY_OPEN_TRANSLATION = "KEY_OPEN_TRANSLATION"
     private const val BUNDLE_KEY_LYRIC = "android.media.metadata.LYRIC"
 
     private var lyriconProvider: LyriconProvider? = null
@@ -93,22 +91,28 @@ object QQMusicHD : YukiBaseHooker() {
                 }
             } ?: YLog.error("$TAG: RemoteControlManager class not found")
 
-        // ========== SharedPreferences Hook ==========
-        "android.app.SharedPreferencesImpl\$EditorImpl".toClass(loader)
-            .resolve()
-            .firstMethod {
-                name = "putBoolean"
-                parameters(String::class.java, Boolean::class.java)
-            }.hook {
-                after {
-                    val key = args[0] as String
-                    val value = args[1] as Boolean
-                    when (key) {
-                        KEY_DISPLAY_TRANS -> lyriconProvider?.player?.setDisplayTranslation(value)
-                        KEY_DISPLAY_ROMA -> lyriconProvider?.player?.setDisplayRoma(value)
+        // ========== MMKV Hook ==========
+        // MMKV in this version implements SharedPreferences interface directly.
+        // SwordProxy replaces SP with MMKV instance, so putInt/getInt go through MMKV.
+        // Hook MMKV.putInt to detect real-time translation toggle changes.
+        try {
+            "com.tencent.mmkv.MMKV".toClass(loader)
+                .resolve()
+                .firstMethod {
+                    name = "putInt"
+                    parameters(String::class.java, Int::class.java)
+                }.hook {
+                    after {
+                        val key = args[0] as String
+                        val value = args[1] as Int
+                        if (key == KEY_OPEN_TRANSLATION) {
+                            lyriconProvider?.player?.setDisplayTranslation(value == 0)
+                        }
                     }
                 }
-            }
+        } catch (e: Exception) {
+            YLog.error("$TAG: Failed to hook MMKV.putInt, translation toggle won't update in real-time", e)
+        }
 
         // ========== MediaSession Hook ==========
         "android.media.session.MediaSession".toClass(loader)
@@ -204,10 +208,14 @@ object QQMusicHD : YukiBaseHooker() {
             logo = ProviderLogo.fromSvg(Constants.ICON)
         )
 
-        val prefs = context.getSharedPreferences(PREF_NAME_QQMUSIC, Context.MODE_PRIVATE)
-        provider.player.apply {
-            setDisplayTranslation(prefs.getBoolean(KEY_DISPLAY_TRANS, false))
-            setDisplayRoma(prefs.getBoolean(KEY_DISPLAY_ROMA, false))
+        // SwordProxy 已将 SP 替换为 MMKV 实例，getSharedPreferences 返回的是 MMKV
+        // 直接通过 SharedPreferences 接口读取初始翻译状态，无需反射
+        // KEY_OPEN_TRANSLATION: 0 = ON, non-zero = OFF
+        try {
+            val prefs = context.getSharedPreferences("qqmusic", Context.MODE_PRIVATE)
+            provider.player.setDisplayTranslation(prefs.getInt(KEY_OPEN_TRANSLATION, 1) == 0)
+        } catch (e: Exception) {
+            YLog.error("$TAG: Failed to read initial translation setting", e)
         }
 
         provider.register()
