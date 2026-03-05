@@ -1,4 +1,6 @@
-# Lyric Extensions for Lyricon
+<!--suppress ALL -->
+
+# LyricProvider - Lyrics Provider
 
 ![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=flat&logo=android)
 ![Release](https://img.shields.io/github/v/release/tomakino/LyricProvider?style=flat&color=blue&logo=github)
@@ -7,77 +9,76 @@
 ![License](https://img.shields.io/github/license/tomakino/LyricProvider?style=flat)
 ![Last Commit](https://img.shields.io/github/last-commit/tomakino/LyricProvider?style=flat)
 
+<p align="left">
+  <a href="README.md"><img src="https://img.shields.io/badge/Document-中文-red.svg" alt="中文"></a>
+</p>
+
 ## 🎵 Supported Platforms
 
-These providers use **Xposed Hooking** to extract real-time lyric data directly from the following
-music applications.
+### Core Adaptations
 
-### Core Integrations (Global & Major)
+| Platform                             | Identifier          | Description                                        |
+|:-------------------------------------|:--------------------|:---------------------------------------------------|
+| 🍎 **Apple Music**                   | `apple-music`       | Supports dynamic lyrics, translated lyrics         |
+| ☁️ **Netease Music**                 | `163-music`         | Supports dynamic lyrics, translated lyrics         |
+| 🐧 **QQ Music**                      | `qq-music`          | Supports dynamic lyrics, translated lyrics         |
+| 🐧 **QQ Music HD**                   | `qq-music-hd`       | Supports dynamic lyrics, translated lyrics         |
+| 🧊 **LX Music**                      | `lx-music`          | Supports translated lyrics display                 |
+| 🐶 **Kugou Music / Concept Edition** | `kugou-music`       | **Requires enabling car lyrics mode in the app**   |
+| 📻 **Kuwo Music**                    | `kuwo-music`        | **Requires enabling car lyrics mode in the app**   |
+| 🎧 **Spotify**                       | `spotify-music`     | Currently only supports standard lyrics            |
+| ⚡ **Poweramp**                       | `poweramp-music`    | Supports online matching and embedded local lyrics |
+| 🧂 **Salt Music**                    | `salt-player-music` | Adapted based on Meizu standard lyric interface    |
+| 🎵 **Qishui Music**                  | `qishui-music`      | Supports dynamic lyrics, translated lyrics         |
 
-| Platform                   | Identifier          | Capabilities                           |
-|:---------------------------|:--------------------|:---------------------------------------|
-| 🎧 **Spotify**             | `spotify-music`     | Standard lyrics (static)               |
-| 🍎 **Apple Music**         | `apple-music`       | Dynamic lyrics, Translations           |
-| ☁️ **NetEase Cloud Music** | `163-music`         | Dynamic lyrics, Translations           |
-| 🐧 **QQ Music**            | `qq-music`          | Dynamic lyrics, Translations           |
-| 🐧 **QQ Music HD**         | `qq-music-hd`       | Dynamic lyrics, Translations           |
-| ⚡ **Poweramp**             | `poweramp-music`    | Online matching & Embedded lyrics      |
-| 🧊 **LX Music**            | `lx-music`          | Lyric translations                     |
-| 🐶 **Kugou / Lite**        | `kugou-music`       | **Requires "Car Mode" enabled in-app** |
-| 📻 **Kuwo Music**          | `kuwo-music`        | **Requires "Car Mode" enabled in-app** |
-| 🧂 **Salt Player**         | `salt-player-music` | Uses Flyme (Meizu) Lyric standard      |
-| 🎵 **汽水音乐**                | `qishui-music`      | Dynamic lyrics, Translations           |
+### Universal / Special Modules
 
-### Universal & Special Modules
+| Module Name                 | Identifier (ID)  | Applicable Scenario                                   |
+|:----------------------------|:-----------------|:------------------------------------------------------|
+| ☁️ **Cloud Provider**       | `cloud-provider` | Universal, matches online lyric libraries via search  |
+| 📱 **Meizu Lyrics Support** | `meizu-provider` | For players that have adapted Meizu status bar lyrics |
+| 🧂 **Car Lyrics Support**   | `car-provider`   | For players that have adapted car lyrics              |
 
-| Module Name                  | Identifier (ID)  | Use Case                                                               |
-|:-----------------------------|:-----------------|:-----------------------------------------------------------------------|
-| ☁️ **Cloud Provider**        | `cloud-provider` | Generic matching via online lyric databases                            |
-| 📱 **Meizu Support**         | `meizu-provider` | Works with any player supporting Meizu Status Bar lyrics               |
-| 🧂 **In-car lyrics Support** | `car-provider`   | Suitable for players that have been adapted for in-car lyrics display. |
+### 🚀 Native Support (No Plugin Needed)
 
-### 🚀 Natively Supported (No Plugin Required)
+The following players have natively integrated this protocol and can be used directly with Lyricon:
 
-The following players have built-in support for the Lyricon protocol and work out of the box:
-
-* **ConePlayer (光锥音乐)**: [Official Homepage](https://coneplayer.trantor.ink/)
+* **Cone Music**: [Official Website](https://coneplayer.trantor.ink/)
 * **Flamingo**
 
 ---
 
-## 📥 Installation
+## 📥 Quick Installation
 
 > [!IMPORTANT]
-> This is an **extension package**. You must have the [Lyricon](https://github.com/tomakino/lyricon)
-> main application installed for this to function.
+> This plugin is an extension component and must be used together with the *
+*[Lyricon](https://github.com/tomakino/lyricon)** main application.
 
-1. **Download**: Grab the latest APK from
-   the [Releases page](https://github.com/tomakino/LyricProvider/releases).
-2. **Activate**: Install the APK, open your **LSPosed Manager**, and enable the specific Provider
-   module.
-3. **Configure Scope**: In LSPosed, select the target music apps you wish to hook (e.g., Spotify,
-   Apple Music).
-4. **Apply**: Force stop and restart your music app to activate the lyrics.
+1. **Download**: Go to the [Releases page](https://github.com/tomakino/LyricProvider/releases) and
+   get the latest APK.
+2. **Activate**: After installation, open **LSPosed Manager** and enable the **corresponding
+   provider**.
+3. **Configure Scope**: In LSPosed, check the music apps you want to fetch lyrics for (e.g., Apple
+   Music, Netease Music, etc.).
+4. **Apply**: Force stop and reopen the respective music app to start enjoying lyrics.
 
 ---
 
 ## 🛠️ Developer Guide
 
-We welcome community contributions! If you'd like to help adapt more music players, please check our
-documentation.
+We warmly welcome community Pull Requests to adapt more music apps.
 
-Refer to
-the [Development Guide](https://github.com/tomakino/lyricon/blob/master/lyric/bridge/provider/README-English.md).
+Please read
+the [Development Documentation](https://github.com/tomakino/lyricon/blob/master/lyric/bridge/provider/README.md)
 
 ---
 
-## 🤝 Contributors
+## 👥 Contributors
 
 [![Contributors](https://contrib.rocks/image?repo=tomakino/LyricProvider)](https://github.com/tomakino/LyricProvider/graphs/contributors)
 
-### Star Growth
+### ⭐ Star History
 
-<!--suppress HtmlUnknownTarget -->
 <a href="https://star-history.com/#tomakino/LyricProvider&Date">
  <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=tomakino/LyricProvider&type=Date&theme=dark" />
@@ -86,6 +87,6 @@ the [Development Guide](https://github.com/tomakino/lyricon/blob/master/lyric/br
  </picture>
 </a>
 
-### Traffic Trends
+### 👀 Visitor Trends
 
 ![Visitors](https://count.getloli.com/get/@tomakino_LyricProvider?theme=minecraft)

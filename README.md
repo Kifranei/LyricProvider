@@ -1,3 +1,5 @@
+<!--suppress ALL -->
+
 # LyricProvider - 歌词提供器
 
 ![Platform](https://img.shields.io/badge/Platform-Android-brightgreen?style=flat&logo=android)
@@ -7,7 +9,6 @@
 ![License](https://img.shields.io/github/license/tomakino/LyricProvider?style=flat)
 ![Last Commit](https://img.shields.io/github/last-commit/tomakino/LyricProvider?style=flat)
 
-<!--suppress ALL -->
 <p align="left">
   <a href="README-English.md"><img src="https://img.shields.io/badge/Document-English-red.svg" alt="EN"></a>
 </p>
@@ -68,11 +69,11 @@
 
 ---
 
-## 🤝 贡献者
+## 👥 贡献者
 
 [![Contributors](https://contrib.rocks/image?repo=tomakino/LyricProvider)](https://github.com/tomakino/LyricProvider/graphs/contributors)
 
-### Star 增长
+### ⭐ Star 增长
 
 <a href="https://star-history.com/#tomakino/LyricProvider&Date">
  <picture>
@@ -82,6 +83,6 @@
  </picture>
 </a>
 
-### 访问趋势
+### 👀 访问趋势
 
 ![Visitors](https://count.getloli.com/get/@tomakino_LyricProvider?theme=minecraft)
