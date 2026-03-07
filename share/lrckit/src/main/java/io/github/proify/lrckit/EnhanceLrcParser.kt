@@ -42,7 +42,11 @@ object EnhanceLrcParser {
                 handleMeta(trimmed, meta, lines)
             }
         }
-        return EnhanceLrcDocument(meta, finalize(lines, duration))
+
+        val offset = meta["offset"]?.toLongOrNull() ?: 0L
+        return EnhanceLrcDocument(meta, finalize(lines, duration)).run {
+            if (offset != 0L) applyOffset(offset) else this
+        }
     }
 
     private fun mergeLines(lines: MutableList<RichLyricLine>, cur: RichLyricLine) {
