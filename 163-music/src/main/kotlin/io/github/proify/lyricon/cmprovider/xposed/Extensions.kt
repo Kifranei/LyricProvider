@@ -27,10 +27,12 @@ fun LocalLyricCache.toSong(): Song {
 
 fun LocalLyricCache.toRichLines(): List<RichLyricLine> {
     val sourceLines = parseSourceLines() ?: return emptyList()
-    val translates = parseSourceTranLines()?.sortedBy { it.begin } // 确保有序
+    val translates = parseSourceTranLines()?.sortedBy { it.begin }
+    val romas = parseRomaLines()
 
     return sourceLines.map { line ->
-        val matchTranslate = translates?.findClosest(line.begin, 100)
+        val matchTranslate = translates?.findClosest(line.begin, 1000)
+        val matchRoma = romas?.findClosest(line.begin, 1000)
 
         RichLyricLine(
             begin = line.begin,
@@ -38,7 +40,8 @@ fun LocalLyricCache.toRichLines(): List<RichLyricLine> {
             duration = line.duration,
             text = line.text,
             words = line.words,
-            translation = matchTranslate?.text
+            translation = matchTranslate?.text,
+            roma = matchRoma?.text
         )
     }
 }
@@ -63,6 +66,14 @@ private fun LocalLyricCache.parseSourceTranLines(): List<LyricLine>? {
     }
 
     lrcTranslateLyric?.takeIf { it.isNotBlank() }?.let {
+        val lines = LrcParser.parse(it).lines
+        if (lines.isNotEmpty()) return lines
+    }
+    return null
+}
+
+private fun LocalLyricCache.parseRomaLines(): List<LyricLine>? {
+    roma?.takeIf { it.isNotBlank() }?.let {
         val lines = LrcParser.parse(it).lines
         if (lines.isNotEmpty()) return lines
     }

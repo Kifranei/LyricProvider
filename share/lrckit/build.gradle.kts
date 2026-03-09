@@ -18,9 +18,12 @@ kotlin {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
-
+tasks.test {
+    useJUnitPlatform()
+}
 dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.lyricon.lyric.model)
     testImplementation(kotlin("test"))
+    testImplementation(libs.junit.jupiter)
 }

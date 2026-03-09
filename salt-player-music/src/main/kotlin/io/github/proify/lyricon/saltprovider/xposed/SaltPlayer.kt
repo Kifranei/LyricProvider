@@ -6,7 +6,6 @@
 
 package io.github.proify.lyricon.saltprovider.xposed
 
-import io.github.proify.lyricon.library.meizuprovider.MeizuProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
 /**

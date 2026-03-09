@@ -11,15 +11,24 @@ import io.github.proify.lyricon.lyric.model.RichLyricLine
 
 /**
  * 增强型歌词解析器。
- * 支持逐字时间轴、多角色区分及 bg 语义化合并。
+ * 兼容标准 LRC、逐字时间轴及多角色标签，并支持正文包含方括号 [] 的特殊文本。
  */
 object EnhanceLrcParser {
 
-    private val LINE_REGEX = Regex("""^(?:\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?])+(.*)$""")
+    /** 严格匹配行首的一个或多个时间戳标签，如 [00:12.34][00:15.00] */
+    private val TIME_PREFIX_REGEX = Regex("""^(\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?])+""")
+
+    /** 匹配单个时间戳标签，用于从前缀字符串中提取具体数值 */
     private val TAG_REGEX = Regex("""\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?]""")
+
+    /** 匹配逐字时间标签，如 <00:12.34> */
     private val WORD_REGEX = Regex("""<(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?>""")
+
+    /** 识别角色前缀，支持 v1 (主唱) 或 bg (背景音) */
     private val PERSON_REGEX = Regex("""^(v\d+|bg):\s*(.+)$""", RegexOption.IGNORE_CASE)
-    private val META_REGEX = Regex("""^\[(\w+)\s*:\s*([^]]*)]$""")
+
+    /** 匹配元数据标签，如 [ar:歌手名] */
+    private val META_REGEX = Regex("""^\[(\w+)\s*:\s*(.*)]$""")
 
     fun parse(raw: String?, duration: Long = 0): EnhanceLrcDocument {
         if (raw.isNullOrBlank()) return EnhanceLrcDocument(emptyMap(), emptyList())
@@ -32,26 +41,34 @@ object EnhanceLrcParser {
             val trimmed = rawLine.trim()
             if (!trimmed.startsWith("[")) return@forEach
 
-            val match = LINE_REGEX.matchEntire(trimmed)
-            if (match != null) {
-                val content = match.groupValues.last().trim()
-                parseStandardLine(trimmed, content, roles).forEach { cur ->
+            val timeMatch = TIME_PREFIX_REGEX.find(trimmed)
+            if (timeMatch != null) {
+                // 核心修复：通过截取时间戳匹配范围之后的字符串作为正文，避免正文内的 [] 被误识别
+                val content = trimmed.substring(timeMatch.range.last + 1).trim()
+                val timeTags = timeMatch.value
+
+                parseStandardLine(timeTags, content, roles).forEach { cur ->
                     mergeLines(lines, cur)
                 }
             } else {
-                handleMeta(trimmed, meta, lines)
+                // 非时间戳开头的行尝试作为元数据处理
+                handleMeta(trimmed, meta, lines, roles)
             }
         }
 
         val offset = meta["offset"]?.toLongOrNull() ?: 0L
-        return EnhanceLrcDocument(meta, finalize(lines, duration)).run {
+        val finalizedLines = finalize(lines, duration)
+
+        return EnhanceLrcDocument(meta, finalizedLines).run {
             if (offset != 0L) applyOffset(offset) else this
         }
     }
 
+    /**
+     * 合并同时间戳行。若当前行与上一行开始时间一致，则将其设为上一行的 secondary 轨道。
+     */
     private fun mergeLines(lines: MutableList<RichLyricLine>, cur: RichLyricLine) {
         val last = lines.lastOrNull()
-        // 时间轴重合时，将当前行作为副轨道 (Secondary)
         if (last != null && last.begin == cur.begin) {
             last.secondary = cur.text
             last.secondaryWords = cur.words
@@ -61,8 +78,13 @@ object EnhanceLrcParser {
         }
     }
 
+    /**
+     * 解析具体的一行歌词内容。
+     * @param timeTags 仅包含行首时间戳的字符串。
+     * @param content 歌词正文内容。
+     */
     private fun parseStandardLine(
-        raw: String,
+        timeTags: String,
         content: String,
         roles: MutableList<String>
     ): List<RichLyricLine> {
@@ -72,15 +94,22 @@ object EnhanceLrcParser {
         PERSON_REGEX.matchEntire(content)?.let {
             person = it.groupValues[1].lowercase()
             text = it.groupValues[2]
+            // 第一个出现的非 bg 角色被定义为主角色
             if (roles.isEmpty() && person != "bg") roles.add(person)
         }
 
         val words = parseWords(text)
-        val plainText = words.takeIf { it.isNotEmpty() }?.joinToString("") { it.text ?: "" } ?: text
+        val plainText = if (words.isNotEmpty()) {
+            words.joinToString("") { it.text ?: "" }
+        } else {
+            text
+        }
+
+        // 背景音或非首位角色默认右对齐
         val isRight =
             person == "bg" || (person != null && roles.isNotEmpty() && person != roles.first())
 
-        return TAG_REGEX.findAll(raw).map { m ->
+        return TAG_REGEX.findAll(timeTags).map { m ->
             val ms = toMs(m.groupValues[1], m.groupValues[2], m.groupValues.getOrNull(3))
             RichLyricLine(
                 begin = words.firstOrNull()?.begin ?: ms,
@@ -92,16 +121,22 @@ object EnhanceLrcParser {
         }.toList()
     }
 
+    /**
+     * 解析逐字时间。通过寻找连续的 <time> 标签并截取其中间的字符来实现。
+     */
     private fun parseWords(content: String): List<LyricWord> {
         val matches = WORD_REGEX.findAll(content).toList()
+        if (matches.isEmpty()) return emptyList()
+
         return matches.mapIndexed { i, m ->
             val start = toMs(m.groupValues[1], m.groupValues[2], m.groupValues.getOrNull(3))
-            val text = content.substring(
-                m.range.last + 1,
-                matches.getOrNull(i + 1)?.range?.first ?: content.length
-            )
+            val nextMatch = matches.getOrNull(i + 1)
+            // 截取当前标签结束到下一个标签开始之间的文字
+            val text =
+                content.substring(m.range.last + 1, nextMatch?.range?.first ?: content.length)
+
             LyricWord(begin = start, text = text).apply {
-                matches.getOrNull(i + 1)?.let { next ->
+                nextMatch?.let { next ->
                     end = toMs(
                         next.groupValues[1],
                         next.groupValues[2],
@@ -113,6 +148,9 @@ object EnhanceLrcParser {
         }
     }
 
+    /**
+     * 转换时间标签为毫秒。根据毫秒位字符串长度自动调整倍率（1位x100, 2位x10, 3位x1）。
+     */
     private fun toMs(mStr: String, sStr: String, fStr: String?): Long {
         val m = mStr.toLongOrNull() ?: 0L
         val s = sStr.toLongOrNull() ?: 0L
@@ -125,34 +163,44 @@ object EnhanceLrcParser {
         return m * 60000 + s * 1000 + ms
     }
 
+    /**
+     * 处理元数据。特殊逻辑：若 tag 为 bg，则尝试将其内容作为上一行歌词的副轨道合并。
+     */
+    @Suppress("unused")
     private fun handleMeta(
         line: String,
         meta: MutableMap<String, String>,
-        lines: List<RichLyricLine>
+        lines: MutableList<RichLyricLine>,
+        roles: List<String>
     ) {
         META_REGEX.matchEntire(line)?.let { m ->
             val tag = m.groupValues[1].lowercase()
             val value = m.groupValues[2].trim()
-            // 处理独立标签背景音 [bg:...]
+
             if (tag == "bg" && lines.isNotEmpty()) {
                 val words = parseWords(value)
                 lines.last().apply {
-                    secondary = words.takeIf { it.isNotEmpty() }?.joinToString("") { it.text ?: "" }
-                        ?: value
+                    secondary =
+                        if (words.isNotEmpty()) words.joinToString("") { it.text ?: "" } else value
                     secondaryWords = words.takeIf { it.isNotEmpty() }
                 }
-            } else meta[tag] = value
+            } else {
+                meta[tag] = value
+            }
         }
     }
 
+    /**
+     * 完成解析后的后处理：排序时间轴，并根据下一行或歌曲总时长补全当前行的结束时间。
+     */
     private fun finalize(lines: List<RichLyricLine>, totalDur: Long): List<RichLyricLine> {
         val sorted = lines.sortedBy { it.begin }
         sorted.forEachIndexed { i, cur ->
             if (cur.end <= cur.begin) {
-                val next = sorted.getOrNull(i + 1)?.begin
-                cur.end = next ?: if (totalDur > cur.begin) totalDur else cur.begin + 5000L
+                val nextBegin = sorted.getOrNull(i + 1)?.begin
+                cur.end = nextBegin ?: if (totalDur > cur.begin) totalDur else cur.begin + 5000L
             }
-            cur.duration = cur.end - cur.begin
+            cur.duration = (cur.end - cur.begin).coerceAtLeast(0)
         }
         return sorted
     }

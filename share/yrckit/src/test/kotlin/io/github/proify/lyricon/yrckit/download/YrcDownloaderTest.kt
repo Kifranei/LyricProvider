@@ -6,17 +6,19 @@
 
 package io.github.proify.lyricon.yrckit.download
 
-import io.github.proify.lrckit.LrcParser
+import io.github.proify.lrckit.EnhanceLrcParser
 import kotlin.test.Test
 
 class YrcDownloaderTest {
 
     @Test
     fun fetchLyric() {
-        val r = YrcDownloader.fetchLyric(2021437775)
+        val r = YrcDownloader.fetchLyric(2728097231)
         println(r)
-        val lines = LrcParser.parse(r.tlyric?.lyric.orEmpty())
-        println(lines.lines)
+        val lines = EnhanceLrcParser.parse(r.tlyric?.lyric.orEmpty())
+        for (line in lines.lines) {
+            println(line)
+        }
     }
 
 }

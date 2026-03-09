@@ -15,8 +15,6 @@ import io.github.proify.extensions.json
 import io.github.proify.lyricon.cmprovider.xposed.Constants.ICON
 import io.github.proify.lyricon.cmprovider.xposed.Constants.PROVIDER_PACKAGE_NAME
 import io.github.proify.lyricon.cmprovider.xposed.PreferencesMonitor.PreferenceCallback
-import io.github.proify.lyricon.cmprovider.xposed.download.DownloadCallback
-import io.github.proify.lyricon.cmprovider.xposed.download.Downloader
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
@@ -40,8 +38,8 @@ object CloudMusic : YukiBaseHooker() {
 
     override fun onHook() {
         when (processName) {
-            "com.netease.cloudmusic",
-            "com.netease.cloudmusic:play" -> {
+            packageName,
+            "$packageName:play" -> {
                 YLog.debug(tag = TAG, msg = "Hooking $processName")
                 providerManager.onHook()
             }
@@ -59,6 +57,8 @@ object CloudMusic : YukiBaseHooker() {
         private var dexKitBridge: DexKitBridge? = null
         private var preferencesMonitor: PreferencesMonitor? = null
 
+        private var translationType: Int = 114514
+
         // ---------------------------------- 入口与初始化 ----------------------------------
 
         fun onHook() {
@@ -66,8 +66,11 @@ object CloudMusic : YukiBaseHooker() {
 
             dexKitBridge = DexKitBridge.create(appInfo.sourceDir)
             preferencesMonitor = PreferencesMonitor(dexKitBridge!!, object : PreferenceCallback {
-                override fun onTranslationOptionChanged(isTranslationSelected: Boolean) {
-                    lyricProvider?.player?.setDisplayTranslation(isTranslationSelected)
+                override fun onTranslationOptionChanged(type: Int) {
+                    if (translationType == type) return; translationType = type
+                    YLog.debug("type=$type")
+                    lyricProvider?.player?.setDisplayTranslation(type == 0)
+                    lyricProvider?.player?.setDisplayRoma(type == 1)
                 }
             })
 
@@ -113,7 +116,11 @@ object CloudMusic : YukiBaseHooker() {
                 playerPackageName = application.packageName,
                 logo = ProviderLogo.fromSvg(ICON)
             ).apply {
-                player.setDisplayTranslation(preferencesMonitor?.isTranslationSelected() == true)
+                val type = preferencesMonitor?.getTranslationType() ?: -1
+                translationType = type
+                player.setDisplayTranslation(type == 0)
+                player.setDisplayRoma(type == 1)
+
                 register()
             }
 
@@ -178,6 +185,7 @@ object CloudMusic : YukiBaseHooker() {
                 yrc = response.yrc?.lyric,
                 yrcTranslateLyric = response.ytlrc?.lyric,
                 pureMusic = response.pureMusic,
+                roma = response.romalrc?.lyric
             )
 
             outputFile.outputStream().use { outputStream ->

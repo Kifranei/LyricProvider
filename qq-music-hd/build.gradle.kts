@@ -60,6 +60,8 @@ configure<ApplicationExtension> {
 }
 
 dependencies {
+    implementation(project(":share:extensions-android"))
+
     implementation(project(":share:lrckit"))
     implementation(project(":share:qrckit"))
 

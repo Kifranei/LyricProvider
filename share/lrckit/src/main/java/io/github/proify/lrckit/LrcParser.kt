@@ -11,21 +11,25 @@ import java.util.regex.Pattern
 
 /**
  * LRC 解析器。
- * 针对网易云等平台非标格式优化，强制降级解析 [mm:ss:ms]，防止小时级偏移错误。
+ * 针对网易云等平台非标格式优化，修复了歌词文本中包含中括号时导致的截断异常。
  */
 object LrcParser {
 
-    private val LINE_PATTERN =
-        Pattern.compile("""^\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?](.*)""")
-    private val TAG_PATTERN = Pattern.compile("""\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?]""")
+    /** 仅用于快速判断行是否包含合法时间标签 */
+    private val LINE_VALIDATOR =
+        Pattern.compile("""^\[\d{1,3}[ :.]\d{2}(?:[ :.]\d{1,3})?].*""")
+
+    /** 用于精确提取时间数值 */
+    private val TAG_PATTERN =
+        Pattern.compile("""\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?]""")
 
     /**
      * 解析原始歌词。
-     * @param raw 原始文本，自动过滤非 '[' 开头的干扰行（如 JSON）。
+     * @param raw 原始文本。
      * @param duration 音频总时长，用于修正末行结束时间。
      */
     fun parse(raw: String?, duration: Long = 0): LrcDocument {
-        if (raw.isNullOrBlank()) return LrcDocument(emptyMap(), emptyList())
+        if (raw.isNullOrBlank()) return LrcDocument()
 
         val entries = mutableListOf<LyricLine>()
         val meta = mutableMapOf<String, String>()
@@ -34,22 +38,31 @@ object LrcParser {
             val trimmed = line.trim()
             if (trimmed.isEmpty() || !trimmed.startsWith("[")) return@forEach
 
-            val matcher = LINE_PATTERN.matcher(trimmed)
-            if (matcher.matches()) {
-                // 提取最后一个 ']' 之后的内容作为正文
-                val content = trimmed.substring(trimmed.lastIndexOf(']') + 1).trim()
+            if (LINE_VALIDATOR.matcher(trimmed).matches()) {
                 val tagMatcher = TAG_PATTERN.matcher(trimmed)
+                val tempTimes = mutableListOf<Long>()
+                var lastTagEnd = 0
+
+                // 只有处于行首且连续的时间标签才被视为时间轴
                 while (tagMatcher.find()) {
-                    entries.add(
-                        LyricLine(
-                            begin = toMs(
-                                tagMatcher.group(1),
-                                tagMatcher.group(2),
-                                tagMatcher.group(3)
-                            ),
-                            text = content
+                    if (tagMatcher.start() != lastTagEnd) {
+                        break
+                    }
+                    tempTimes.add(
+                        toMs(
+                            tagMatcher.group(1),
+                            tagMatcher.group(2),
+                            tagMatcher.group(3)
                         )
                     )
+                    lastTagEnd = tagMatcher.end()
+                }
+
+                // 剩余部分即为歌词正文，即使其中包含 [文本] 也不会被截断
+                val content = trimmed.substring(lastTagEnd).trim()
+
+                tempTimes.forEach { time ->
+                    entries.add(LyricLine(begin = time, text = content))
                 }
             } else {
                 parseMeta(trimmed, meta)
@@ -89,6 +102,10 @@ object LrcParser {
             val end = next ?: if (dur > cur.begin) dur else cur.begin + 5000L
             cur.copy(end = end, duration = end - cur.begin)
         }
-        return LrcDocument(meta, lines)
+
+        val offset = meta["offset"]?.toLongOrNull() ?: 0L
+        return LrcDocument(meta, lines).run {
+            if (offset != 0L) applyOffset(offset) else this
+        }
     }
 }

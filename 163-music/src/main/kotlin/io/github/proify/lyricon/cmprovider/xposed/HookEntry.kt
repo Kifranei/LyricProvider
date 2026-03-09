@@ -16,6 +16,7 @@ open class HookEntry : IYukiHookXposedInit {
     override fun onHook() {
         YukiHookAPI.encase {
             loadApp(Constants.MUSIC_PACKAGE_NAME, CloudMusic)
+            loadApp(Constants.HONOR_MUSIC_PACKAGE_NAME, CloudMusic)
         }
     }
 

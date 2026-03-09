@@ -8,12 +8,11 @@ package io.github.proify.lyricon.qmhdprovider.xposed
 
 import android.content.Context
 import android.media.MediaMetadata
+import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.os.Bundle
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
-import io.github.proify.lrckit.EnhanceLrcParser
 import io.github.proify.lyricon.lyric.model.RichLyricLine
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
@@ -23,50 +22,45 @@ import io.github.proify.qrckit.QrcDownloader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * QQ音乐HD 歌词提供器 Hook
- *
- * 策略：
- * 1. Hook RemoteControlManager 的 notifyMetaChangeToSystem 方法，
- *    直接从 SongInfo.getSongId() 获取真实 songId
- * 2. setMetadata 触发时先用内嵌 LRC 立即显示行级歌词
- * 3. 异步用 songId 调 QrcDownloader 下载 QRC 逐字歌词并替换
+ * QQ音乐 HD 版 Lyricon 适配器
  */
 object QQMusicHD : YukiBaseHooker() {
 
     private const val TAG = "Lyricon_QQMusicHD"
-
     private const val KEY_OPEN_TRANSLATION = "KEY_OPEN_TRANSLATION"
-    private const val BUNDLE_KEY_LYRIC = "android.media.metadata.LYRIC"
+    private const val PREF_NAME_QQMUSIC = "qqmusic"
 
-    private var lyriconProvider: LyriconProvider? = null
-    @Volatile private var currentSongId: String? = null
+    private var provider: LyriconProvider? = null
 
-    /** 由 RemoteControlManager hook 捕获的真实 songId */
-    @Volatile private var latestSongId: String? = null
+    @Volatile
+    private var currentSongId: String? = null
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val downloadingIds = ConcurrentHashMap.newKeySet<String>()
+    @Volatile
+    private var pendingSongId: String? = null
 
-    /** QRC 歌词缓存：songId → lyrics，LRU 淘汰，最多缓存 20 首 */
-    private val qrcCache = object : LinkedHashMap<String, List<RichLyricLine>>(20, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, List<RichLyricLine>>?) =
-            size > 20
-    }
+    private val internalScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val ongoingDownloads = ConcurrentHashMap.newKeySet<String>()
 
+    private var isCreated = false
     override fun onHook() {
         val loader = appClassLoader ?: return
 
         onAppLifecycle {
-            onCreate { setupLyriconProvider(this) }
+            onCreate {
+                if (isCreated) return@onCreate; isCreated = true
+
+                DiskSongCache.initialize(this)
+                initLyriconProvider(this)
+            }
+            onTerminate { internalScope.cancel() }
         }
 
-        // ========== Hook RemoteControlManager 获取真实 songId ==========
-        // 调用链：notifyMetaChangeToSystem → updateMetaData → MediaSession.setMetadata()
-        // 仅按参数类型匹配，不依赖混淆后的方法名
+        // ========== Hook RemoteControlManager 以拦截真实 SongId ==========
         "com.tencent.qqmusic.qplayer.core.player.controller.RemoteControlManager"
             .toClassOrNull(loader)
             ?.resolve()
@@ -79,150 +73,138 @@ object QQMusicHD : YukiBaseHooker() {
                 }.hook {
                     before {
                         val songInfo = args[0] ?: return@before
-                        try {
-                            val songId = songInfo.javaClass
-                                .getMethod("getSongId")
-                                .invoke(songInfo) as Long
-                            latestSongId = songId.toString()
-                        } catch (e: Exception) {
-                            YLog.error("$TAG: Failed to extract songId", e)
+                        runCatching {
+                            // 使用反射获取 SongId，此处保持 Long 到 String 的转换
+                            val id =
+                                songInfo.javaClass.getMethod("getSongId").invoke(songInfo) as Long
+                            pendingSongId = id.toString()
+                        }.onFailure { e ->
+                            YLog.error("$TAG: Failed to extract songId from SongInfo", e)
                         }
                     }
                 }
             } ?: YLog.error("$TAG: RemoteControlManager class not found")
 
-        // ========== MMKV Hook ==========
-        // MMKV in this version implements SharedPreferences interface directly.
-        // SwordProxy replaces SP with MMKV instance, so putInt/getInt go through MMKV.
-        // Hook MMKV.putInt to detect real-time translation toggle changes.
-        try {
-            "com.tencent.mmkv.MMKV".toClass(loader)
-                .resolve()
-                .firstMethod {
+        // ========== Hook MMKV 实时监听翻译开关 ==========
+        "com.tencent.mmkv.MMKV".toClassOrNull(loader)
+            ?.resolve()
+            ?.apply {
+                firstMethod {
                     name = "putInt"
                     parameters(String::class.java, Int::class.java)
                 }.hook {
                     after {
-                        val key = args[0] as String
-                        val value = args[1] as Int
-                        if (key == KEY_OPEN_TRANSLATION) {
-                            lyriconProvider?.player?.setDisplayTranslation(value == 0)
+                        val key = args[0] as? String
+                        val value = args[1] as? Int
+                        if (key == KEY_OPEN_TRANSLATION && value != null) {
+                            // 0 为开启，非 0 为关闭
+                            provider?.player?.setDisplayTranslation(value == 0)
                         }
                     }
                 }
-        } catch (e: Exception) {
-            YLog.error("$TAG: Failed to hook MMKV.putInt, translation toggle won't update in real-time", e)
-        }
+            }
 
-        // ========== MediaSession Hook ==========
-        "android.media.session.MediaSession".toClass(loader)
-            .resolve().apply {
-                firstMethod {
-                    name = "setPlaybackState"
-                    parameters(PlaybackState::class.java)
-                }.hook {
-                    after {
-                        lyriconProvider?.player?.setPlaybackState(args[0] as? PlaybackState)
-                    }
-                }
-
-                firstMethod {
-                    name = "setMetadata"
-                    parameters(MediaMetadata::class.java)
-                }.hook {
-                    after {
-                        (args[0] as? MediaMetadata)?.let { handleMetadata(it) }
-                    }
+        // ========== Hook MediaSession 同步播放状态与元数据 ==========
+        MediaSession::class.java.resolve().apply {
+            firstMethod {
+                name = "setPlaybackState"
+                parameters(PlaybackState::class.java)
+            }.hook {
+                after {
+                    val state = args[0] as? PlaybackState
+                    provider?.player?.setPlaybackState(state)
                 }
             }
+
+            firstMethod {
+                name = "setMetadata"
+                parameters(MediaMetadata::class.java)
+            }.hook {
+                after {
+                    val metadata = args[0] as? MediaMetadata
+                    metadata?.let { processMetadata(it) }
+                }
+            }
+        }
     }
 
-    // ========== 歌曲处理 ==========
-
-    private fun handleMetadata(metadata: MediaMetadata) {
-        val songId = latestSongId ?: return
+    /**
+     * 处理歌曲元数据变更并触发歌词下载
+     */
+    private fun processMetadata(metadata: MediaMetadata) {
+        val songId = pendingSongId ?: return
         if (songId == currentSongId) return
         currentSongId = songId
 
-        val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
-        val artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE) ?: ""
+        val artist = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: ""
         val duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION)
 
-        // 1. 已有 QRC 缓存，直接用
-        synchronized(qrcCache) { qrcCache[songId] }?.let { cached ->
-            lyriconProvider?.player?.setSong(
-                Song(id = songId, name = title, artist = artist,
-                    duration = duration, lyrics = cached)
-            )
+        // 优先检查本地缓存
+        DiskSongCache.get(songId)?.let { cachedSong ->
+            provider?.player?.setSong(cachedSong)
             return
         }
 
-        // 2. 先用内嵌 LRC 立即显示
-        val lrcLines = extractLyric(metadata)?.let {
-            EnhanceLrcParser.parse(it, duration).lines
-                .filter { line -> !line.text.isNullOrBlank() }
-        }
-        lyriconProvider?.player?.setSong(
-            Song(id = songId, name = title, artist = artist,
-                duration = duration, lyrics = lrcLines)
-        )
+        // 无缓存时先更新基本信息，再异步下载歌词
+        val initialSong = Song(id = songId, name = title, artist = artist, duration = duration)
+        provider?.player?.setSong(initialSong)
 
-        // 3. 异步下载 QRC 逐字歌词
-        if (!downloadingIds.add(songId)) return
-        scope.launch {
+        if (!ongoingDownloads.add(songId)) return
+
+        internalScope.launch {
             try {
-                val qrcLyrics = QrcDownloader.downloadLyrics(songId)
-                    .parsedLyric.richLyricLines
-                    .removeInvalidTranslation()
+                val qrcResult = QrcDownloader.downloadLyrics(songId)
+                val richLyrics = qrcResult.parsedLyric.richLyricLines.filterInvalidTranslation()
 
-                if (qrcLyrics.isNotEmpty()) {
-                    synchronized(qrcCache) { qrcCache[songId] = qrcLyrics }
-                    if (currentSongId == songId) {
-                        lyriconProvider?.player?.setSong(
-                            Song(id = songId, name = title, artist = artist,
-                                duration = duration, lyrics = qrcLyrics)
-                        )
+                if (richLyrics.isNotEmpty()) {
+                    val fullSong = initialSong.copy(lyrics = richLyrics)
+                    DiskSongCache.put(fullSong)
+
+                    if (songId == currentSongId) {
+                        provider?.player?.setSong(fullSong)
                     }
                 }
             } catch (e: Exception) {
                 YLog.error("$TAG: QRC download failed for songId=$songId", e)
             } finally {
-                downloadingIds.remove(songId)
+                ongoingDownloads.remove(songId)
             }
         }
     }
 
-    // ========== 工具方法 ==========
-
-    private fun extractLyric(metadata: MediaMetadata): String? = try {
-        val bundleField = MediaMetadata::class.java.getDeclaredField("mBundle")
-        bundleField.isAccessible = true
-        (bundleField.get(metadata) as? Bundle)?.getString(BUNDLE_KEY_LYRIC)
-    } catch (_: Exception) { null }
-
-    private fun setupLyriconProvider(context: Context) {
-        val provider = LyriconFactory.createProvider(
+    /**
+     * 初始化 Lyricon 提供者
+     */
+    private fun initLyriconProvider(context: Context) {
+        val newProvider = LyriconFactory.createProvider(
             context = context,
             providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
             playerPackageName = Constants.MUSIC_PACKAGE_NAME,
             logo = ProviderLogo.fromSvg(Constants.ICON)
         )
 
-        // SwordProxy 已将 SP 替换为 MMKV 实例，getSharedPreferences 返回的是 MMKV
-        // 直接通过 SharedPreferences 接口读取初始翻译状态，无需反射
-        // KEY_OPEN_TRANSLATION: 0 = ON, non-zero = OFF
-        try {
-            val prefs = context.getSharedPreferences("qqmusic", Context.MODE_PRIVATE)
-            provider.player.setDisplayTranslation(prefs.getInt(KEY_OPEN_TRANSLATION, 1) == 0)
-        } catch (e: Exception) {
+        // 读取初始翻译配置
+        runCatching {
+            val prefs = context.getSharedPreferences(PREF_NAME_QQMUSIC, Context.MODE_PRIVATE)
+            val isTranslationOn = prefs.getInt(KEY_OPEN_TRANSLATION, 1) == 0
+            newProvider.player.setDisplayTranslation(isTranslationOn)
+        }.onFailure { e ->
             YLog.error("$TAG: Failed to read initial translation setting", e)
         }
 
-        provider.register()
-        this.lyriconProvider = provider
+        newProvider.register()
+        this.provider = newProvider
     }
 
-    private fun List<RichLyricLine>.removeInvalidTranslation() = apply {
-        forEach { if (it.translation?.trim() == "//") it.translation = null }
+    /**
+     * 过滤无效的翻译标记（如 "//"）
+     */
+    private fun List<RichLyricLine>.filterInvalidTranslation(): List<RichLyricLine> {
+        return this.onEach { line ->
+            if (line.translation?.trim() == "//") {
+                line.translation = null
+            }
+        }
     }
 }

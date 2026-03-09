@@ -4,7 +4,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.cmprovider.xposed.download
+package io.github.proify.lyricon.cmprovider.xposed
 
 import io.github.proify.lyricon.yrckit.download.response.LyricResponse
 

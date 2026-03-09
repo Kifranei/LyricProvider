@@ -44,7 +44,7 @@ class PreferencesMonitor(
     private val sharedPreferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key == "showLyricSetting") {
-                callback.onTranslationOptionChanged(isTranslationSelected(sharedPreferences))
+                callback.onTranslationOptionChanged(getTranslationType(sharedPreferences))
             }
         }
 
@@ -61,10 +61,10 @@ class PreferencesMonitor(
         return preferences
     }
 
-    fun isTranslationSelected(preference: SharedPreferences? = this.lazyGetSharedPreferences()): Boolean =
-        preference?.getInt("showLyricSetting", -1) == 0
+    fun getTranslationType(preference: SharedPreferences? = this.lazyGetSharedPreferences()): Int =
+        preference?.getInt("showLyricSetting", -1) ?: -1
 
     interface PreferenceCallback {
-        fun onTranslationOptionChanged(isTranslationSelected: Boolean)
+        fun onTranslationOptionChanged(type: Int)
     }
 }
