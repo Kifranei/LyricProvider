@@ -62,7 +62,11 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
             providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
             playerPackageName = Constants.MUSIC_PACKAGE_NAME,
             logo = ProviderLogo.fromSvg(Constants.ICON)
-        ).apply { register() }
+        ).apply {
+            register()
+            // Spotify 不提供“显示翻译”开关，这里默认开启以便 AI 翻译完成后可直接双行显示。
+            player.setDisplayTranslation(true)
+        }
     }
 
     private fun hookMediaSession() {
@@ -149,6 +153,9 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
 
     private fun setSong(song: Song) {
         lastSong = song
-        lyriconProvider?.player?.setSong(song)
+        lyriconProvider?.player?.apply {
+            setDisplayTranslation(true)
+            setSong(song)
+        }
     }
 }
