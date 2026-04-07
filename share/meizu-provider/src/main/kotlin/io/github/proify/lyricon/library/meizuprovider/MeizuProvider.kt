@@ -84,7 +84,6 @@ open class MeizuProvider(
                                 provider.player.sendText(null)
                                 return@after
                             }
-                            //val lines = ticker.lines()
                             provider.player.sendText(ticker)
                         }
                     }

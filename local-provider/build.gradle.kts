@@ -13,21 +13,24 @@ plugins {
 }
 
 configure<ApplicationExtension> {
-    namespace = "io.github.proify.lyricon.cmprovider"
+    namespace = "io.github.proify.lyricon.localprovider"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(36)
     }
 
     defaultConfig {
-        applicationId = "io.github.proify.lyricon.cmprovider"
-        minSdk = 28
+        applicationId = "io.github.proify.lyricon.localprovider"
+        minSdk = 27
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.5-beta1"
+        versionCode = 1
+        versionName = "1.0.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("armeabi-v7a")
+        }
+
+        resConfigs("zh", "en")
     }
 
     signingConfigs {
@@ -40,11 +43,11 @@ configure<ApplicationExtension> {
     }
 
     buildTypes {
-        getByName("debug") {
+        debug {
             signingConfig = signingConfigs.getByName("release")
         }
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+        release {
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -58,28 +61,27 @@ configure<ApplicationExtension> {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     buildFeatures {
         buildConfig = true
     }
 }
 
 dependencies {
+    // 共享模块（依赖更新后的 lrckit）
+    implementation(project(":share:lrckit"))              
+    implementation(project(":share:extensions-kt"))
     implementation(project(":share:extensions-android"))
-    implementation(project(":share:lrckit"))
-    implementation(project(":share:yrckit"))
+
+    implementation(project(":share:cloudlyric"))
 
     implementation(libs.lyricon.provider)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.dexkit)
-
     implementation(libs.yukihookapi.api)
     implementation(libs.kavaref.core)
     implementation(libs.kavaref.extension)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.taglib)      // 内嵌歌词需要
     compileOnly(libs.xposed.api)
     ksp(libs.yukihookapi.ksp.xposed)
-
-    implementation(libs.androidx.core.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

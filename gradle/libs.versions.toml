@@ -19,7 +19,7 @@ ksp = "2.3.4"
 kavaref-core = "1.0.2"
 kavaref-extension = "1.0.2"
 kotlinxSerializationJson = "1.10.0"
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 junitJupiter = "6.0.3"
 
 [libraries]

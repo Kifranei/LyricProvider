@@ -26,11 +26,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -63,10 +63,10 @@ jobs:
       - name: Collect APKs to flat directory
         run: |
           mkdir -p collected-apks
-          
+
           # 复制所有 APK 文件
           find . -name "*.apk" -path "*/build/outputs/apk/${{ env.BUILD_TYPE }}/*" -exec cp {} collected-apks/ \;
-          
+
           echo "Collected files:"
           ls -lh collected-apks/
 
